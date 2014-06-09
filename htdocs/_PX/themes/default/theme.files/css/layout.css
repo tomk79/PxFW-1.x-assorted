@@ -1,0 +1,343 @@
+<?php
+	$obj_funcs = $this->px->load_pxtheme_class('/funcs.php');
+	$obj_funcs = new $obj_funcs($this->px);
+
+	$colors = $obj_funcs->get_color_scheme();
+?>
+@charset "UTF-8";
+
+body{
+	text-align:center;
+	padding:0px 0px 0px 0px;
+	margin:0px 0px 0px 0px;
+	background-color:#f5f5f5;
+	color:#333;
+	-webkit-text-size-adjust: 100%;
+}
+@media all and (max-width:260px){
+	body{
+		word-break:break-all;
+	}
+}
+a{
+	color: <?php print $colors['link']; ?>;
+	text-decoration: underline;
+}
+a:hover{
+	text-decoration: none;
+}
+.current{
+	font-weight:bold;
+}
+svg,
+img{
+	max-width:100%;
+	max-height:100%;
+}
+
+.theme_outline{
+	text-align:left;
+	max-width:980px;
+	width:auto;
+	margin:0 auto;
+	padding:0 10px;
+}
+header{
+	margin:0 auto;
+	padding:1em 10px 0.5em 10px;
+	text-align:left;
+	max-width:980px;
+	width:auto;
+}
+header .theme_logo{
+	padding:0; margin:0;
+	font-size:x-large;
+	float:left;
+}
+header .theme_logo span,
+header .theme_logo a{
+	font-weight:bold;
+	color: <?php print $colors['link']; ?>;
+	text-decoration: none;
+}
+header .theme_logo a:hover{
+	text-decoration: underline;
+}
+header .theme_logo span:before,
+header .theme_logo a:before{
+	content:url('data:image/svg+xml;base64,<?php print base64_encode($obj_funcs->create_src_pxfw_logo_svg(array('color'=>$colors['link']))); ?>');
+	vertical-align: text-top;
+	margin-right:15px;
+}
+header .theme_head_menu{
+	text-align: center;
+	margin:1em 0;
+	float:right;
+	font-size: 80%;
+}
+header .theme_head_menu ul{
+	padding:0; margin:0;
+}
+header .theme_head_menu ul li{
+	padding:0; margin:0 0.5em;
+	list-style-type:none;
+	display:inline;
+}
+header .theme_head_menu a{
+	text-decoration:none;
+	color:<?php print $colors['link']; ?>;
+	display:inline-block;
+}
+header .theme_head_menu a.current,
+header .theme_head_menu a:hover{
+	text-decoration:underline;
+}
+header .theme_head_menu a:before{
+	content:url('<?php print $obj_funcs->create_src_link_icon_uri('icon', array('colors'=>array('link'=>$colors['link'],'linkx'=>$colors['white']))); ?>');
+	margin-right:4px;
+}
+.theme_welcome{
+	background-color:#fff;
+	padding:1px;
+	margin:0 0 1em 0;
+}
+.theme_middle{
+	clear:both;
+	margin:0 0 1em 0;
+}
+.theme_column1{
+	width:74%;
+	float:left;
+	background-color: <?php print $colors['main']; ?>;
+	color: <?php print $colors['white']; ?>;
+	margin-bottom:1em;
+	box-shadow: 0px 3px 5px rgba(0,0,0,0.1);
+}
+.theme_column1 a{
+}
+.theme_column1-header{
+	padding:0.5em 2em;
+}
+.theme_column1-content{
+	padding:0.5em 20px;
+	background-color:#fff;
+	color:#333;
+	min-height:15em;
+}
+body.theme_layout_top .theme_column1{
+	float:none;
+	width:auto;
+}
+body.theme_layout_top .theme_column2{
+	display:none;
+}
+@media all and (max-width:620px){
+	.theme_column1-header{
+		padding:0.5em 1em;
+	}
+	.theme_column1-content{
+		padding:0.5em 20px;
+	}
+}
+
+.theme_column2{
+	width:24%;
+	float:right;
+	box-shadow: 0px 3px 5px rgba(0,0,0,0.1);
+}
+.theme_column2 nav{
+}
+
+.theme_localnavi{
+}
+.theme_localnavi .theme_localnavi-parent{
+	font-size:80%;
+	text-align: center;
+	background-color: ;
+}
+.theme_localnavi ul{
+	margin:0;
+	padding:0;
+}
+.theme_localnavi ul li{
+	margin:0;
+	padding:0;
+	list-style-type:none;
+}
+.theme_localnavi a{
+	color:<?php print $colors['link']; ?>;
+	background-color:#fff;
+	display:block;
+	padding:0.5em 0.5em 0.5em 1em;
+	margin:0 0 1px 0;
+	text-decoration:none;
+}
+.theme_localnavi a:before{
+	content:url('<?php print $obj_funcs->create_src_link_icon_uri('icon', array('colors'=>array('link'=>$colors['link'],'linkx'=>$colors['white']))); ?>');
+	margin-right:4px;
+}
+.theme_localnavi a:hover{
+	color: <?php print $colors['link']; ?>;
+	text-decoration:underline;
+}
+.theme_localnavi ul ul li a{
+	padding-left:2em;
+	font-size:90%;
+}
+.theme_localnavi ul ul li a:before{
+	content:none;
+}
+.theme_localnavi .theme_localnavi-parent a,
+.theme_localnavi .theme_localnavi-parent a:hover{
+	color: #000;
+	background-color: #ddd;
+	padding:0.2em 1em;
+}
+.theme_localnavi .theme_localnavi-parent a:before{
+	content:none;
+}
+
+
+
+
+.theme_foot_back2top{
+	padding:0.2em 1em;
+	margin:0.2em auto;
+	text-align: right;
+	background-color:transparent;
+	color:<?php print $colors['main']; ?>;
+	max-width:980px;
+	width:auto;
+}
+footer{
+	clear:both;
+	background-color: #ddd;
+	margin:1em auto 0 auto;
+}
+footer .theme_footer_inner{
+	padding:1em 10px 0.5em 10px;
+	margin:0 auto;
+	text-align:left;
+	max-width:980px;
+	width:auto;
+}
+footer .theme_foot_menu{
+	text-align: center;
+	margin:1em 0;
+}
+footer .theme_foot_menu ul{
+	padding:0; margin:0;
+}
+footer .theme_foot_menu ul li{
+	padding:0; margin:0 0.5em;
+	list-style-type:none;
+	display:inline;
+}
+footer .theme_foot_close a,
+footer .theme_foot_menu a{
+	text-decoration:none;
+	color:<?php print $colors['link']; ?>;
+}
+footer .theme_foot_close a.current,
+footer .theme_foot_menu a.current,
+footer .theme_foot_close a:hover,
+footer .theme_foot_menu a:hover{
+	text-decoration:underline;
+}
+footer .theme_foot_close a:before,
+footer .theme_foot_menu a:before{
+	content:url('<?php print $obj_funcs->create_src_link_icon_uri('icon', array('colors'=>array('link'=>$colors['link'],'linkx'=>$colors['white']))); ?>');
+	margin-right:4px;
+}
+footer .theme_foot_close{
+	text-align: center;
+	margin:1em 0;
+}
+footer .theme_foot_back2top *{
+	color: <?php print $colors['link']; ?>;
+	text-decoration: none;
+}
+
+@media all and (max-width:620px){
+	.theme_column1{
+		float:none;
+		width:auto;
+	}
+	.theme_column2{
+		float:none;
+		width:auto;
+	}
+
+}
+
+/**
+ * [static] .clearfix (and [unit] unit)
+ */
+.theme_middle{
+	display:block;
+	float:none;
+	clear:both;
+}
+.theme_middle:after{
+	content: " ";
+	display:block;
+	visibility:hidden;
+	height:0.1px;
+	font-size:0.1em;
+	line-height:0;
+	clear:both;
+}
+.theme_middle{
+	/* clearfix(for IE6,7) (IE8以降不要) */
+	zoom:1;
+}
+
+/**
+ * パンくず
+ */
+.breadcrumb{
+	padding:0;
+	margin:0.2em 0;
+	background-color:transparent;
+	float:none;
+	clear:both;
+	color:<?php print $colors['link']; ?>;
+}
+.breadcrumb ul,
+.breadcrumb ul li{
+	display: inline;
+	list-style-type: none;
+	margin:0px;
+	padding:0px;
+	font-size: 85%;
+}
+.breadcrumb *{
+	color:<?php print $colors['link']; ?>;
+}
+
+
+/**
+ * .clearfix
+ */
+header,
+footer {
+  display: block;
+  float: none;
+  clear: both;
+
+  /* clearfix(for IE6,7) (IE8以降不要) */
+  zoom: 1;
+}
+
+header:after,
+footer:after {
+  content: " ";
+  display: block;
+  visibility: hidden;
+  height: 0.1px;
+  font-size: 0.1em;
+  line-height: 0;
+  clear: both;
+}
+
+

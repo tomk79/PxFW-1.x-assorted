@@ -1,0 +1,65 @@
+@charset "UTF-8";
+
+body{
+	text-align:center;
+	padding:0px 0px 0px 0px;
+	margin:0px 0px 0px 0px;
+}
+.theme_outline{
+	text-align:left;
+	width:980px;
+	margin:0px auto;
+}
+.theme_header{
+}
+.theme_logo{
+}
+.theme_logo a{
+	font-size:150%;
+	font-weight:bold;
+}
+
+.theme_middle{
+	clear:both;
+}
+.theme_column1{
+	width:74%;
+	float:left;
+}
+
+.theme_column2{
+	width:24%;
+	float:right;
+}
+
+.theme_footer{
+	text-align:center;
+	clear:both;
+}
+.theme_footer-page_top{
+	text-align:right;
+}
+
+/**
+ * パンくず
+ */
+.breadcrumb{
+	text-align:left;
+}
+.breadcrumb ul,
+.breadcrumb ul li{
+	display: inline;
+	list-style-type: none;
+	margin:0px;
+	padding:0px;
+	font-size: 85%;
+}
+
+/**
+ * カレントページ
+ */
+.current{
+	font-weight:bold;
+}
+
+

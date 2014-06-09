@@ -1,0 +1,62 @@
+<?php
+	//↓ $page_info にページの情報を格納しています。
+	//	 test::var_dump( $page_info ); で、変数の内容を確認できます。
+	$page_info = $this->px->site()->get_current_page_info();
+?><!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+<?php /*
+↓ t::h() は、htmlspecialchars() のショートカットです。
+*/ ?>
+		<title><?php print t::h($page_info['title']); ?> | <?php print t::h($px->get_conf('project.name')); ?></title>
+		<meta name="keywords" content="<?php print t::h($page_info['keywords']); ?>" />
+		<meta name="description" content="<?php print t::h($page_info['description']); ?>" />
+		<meta name="viewport" content="width=device-width" />
+<?php
+	// ↓コンテンツの環境構築を読み込みます。
+	@include( $_SERVER['DOCUMENT_ROOT'].$px->theme()->href('/common/contents_manifesto.nopublish.inc.php') );
+?>
+<?php
+	// ↓これはSSIの実装サンプルです。
+	print $px->ssi($px->theme()->href('/common/inc/common_setup.inc'));
+?>
+		<link rel="stylesheet" href="<?php print t::h($px->path_theme_files('/css/common.css')); ?>" type="text/css" />
+<?php
+	//↓コンテンツから受け取った
+	//	headセクション内用のソースを出力しています。
+	print $px->theme()->pull_content('head');
+?>
+	</head>
+	<body>
+		<div class="theme_outline" id="page_top">
+			<header>
+				<div class="theme_logo"><span><?php print t::h($px->get_conf('project.name')); ?></span></div>
+			</header>
+			<div class="theme_middle">
+				<div class="theme_column1">
+					<div class="theme_column1-header">
+						<h1><?php print t::text2html( $page_info['title_h1'] ); ?></h1>
+					</div>
+					<div class="theme_column1-content">
+						<div id="content" class="contents">
+
+<?php
+	//↓コンテンツから受け取った
+	//	コンテンツエリアのソースを出力しています。
+	print $px->theme()->pull_content();
+?>
+
+						</div><!-- /#content -->
+					</div>
+				</div><!-- /.theme_column1 -->
+				<div class="theme_column2">
+				</div><!-- /.theme_column2 -->
+			</div><!-- /.middle -->
+			<footer>
+				<div class="theme_foot_back2top"><a href="#page_top" class="up">ページの先頭へ戻る</a></div>
+				<div class="theme_foot_close"><a href="javascript:window.close();">閉じる</a></div>
+			</footer>
+		</div><!-- /.outline -->
+	</body>
+</html>

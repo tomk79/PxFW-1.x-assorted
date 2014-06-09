@@ -1,0 +1,42 @@
+<?php
+	//↓ $page_info にページの情報を格納しています。
+	//	 test::var_dump( $page_info ); で、変数の内容を確認できます。
+	$page_info = $this->px->site()->get_current_page_info();
+?><!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+<?php /*
+↓ t::h() は、htmlspecialchars() のショートカットです。
+*/ ?>
+		<title><?php print t::h($page_info['title']); ?> | <?php print t::h($px->get_conf('project.name')); ?></title>
+		<meta name="keywords" content="<?php print t::h($page_info['keywords']); ?>" />
+		<meta name="description" content="<?php print t::h($page_info['description']); ?>" />
+		<meta name="viewport" content="width=device-width" />
+<?php
+	// ↓コンテンツの環境構築を読み込みます。
+	@include( $_SERVER['DOCUMENT_ROOT'].$px->theme()->href('/common/contents_manifesto.nopublish.inc.php') );
+?>
+<?php
+	// ↓これはSSIの実装サンプルです。
+	print $px->ssi($px->theme()->href('/common/inc/common_setup.inc'));
+?>
+		<link rel="stylesheet" href="<?php print t::h($px->path_theme_files('/css/common.css')); ?>" type="text/css" />
+<?php
+	//↓コンテンツから受け取った
+	//	headセクション内用のソースを出力しています。
+	print $px->theme()->pull_content('head');
+?>
+	</head>
+	<body>
+		<div id="content" class="contents">
+
+<?php
+	//↓コンテンツから受け取った
+	//	コンテンツエリアのソースを出力しています。
+	print $px->theme()->pull_content();
+?>
+
+		</div><!-- /#content -->
+	</body>
+</html>

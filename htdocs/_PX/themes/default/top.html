@@ -1,0 +1,189 @@
+<?php
+	$obj_funcs = $this->px->load_pxtheme_class('/funcs.php');
+	$obj_funcs = new $obj_funcs($this->px);
+
+	//↓ $page_info にページの情報を格納しています。
+	//	 test::var_dump( $page_info ); で、変数の内容を確認できます。
+	$page_info = $this->px->site()->get_current_page_info();
+	$colors = $obj_funcs->get_color_scheme();
+	$test_results = $obj_funcs->setup_test();
+	$messageBoxSetting = array();
+	$messageBoxSetting['main'] = $colors['main'];
+	$messageBoxSetting['bg'] = '#fff';
+	$messageBoxSetting['radius'] = '1em';
+	if( count($test_results) ){
+		// エラーが検出された場合
+		$messageBoxSetting['main'] = '#ff0000';
+		$messageBoxSetting['bg'] = '#ffeeee';
+		$messageBoxSetting['radius'] = '0px';
+	}
+?><!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+<?php /*
+↓ t::h() は、htmlspecialchars() のショートカットです。
+*/ ?>
+		<title><?php print t::h($page_info['title']); ?> | <?php print t::h($px->get_conf('project.name')); ?></title>
+		<meta name="keywords" content="<?php print t::h($page_info['keywords']); ?>" />
+		<meta name="description" content="<?php print t::h($page_info['description']); ?>" />
+		<meta name="viewport" content="width=device-width" />
+<?php
+	// ↓コンテンツの環境構築を読み込みます。
+	@include( $_SERVER['DOCUMENT_ROOT'].$px->theme()->href('/common/contents_manifesto.nopublish.inc.php') );
+?>
+<?php
+	// ↓これはSSIの実装サンプルです。
+	print $px->ssi($px->theme()->href('/common/inc/common_setup.inc'));
+?>
+		<link rel="stylesheet" href="<?php print t::h($px->path_theme_files('/css/common.css')); ?>" type="text/css" />
+		<style type="text/css">
+			.theme_welcome{
+				background:#fff;
+				min-height:300px;
+				text-align: center;
+				padding:20px 1em 0;
+			}
+			.theme_welcome .theme_welcome-inner{
+				width:auto;
+				max-width:900px;
+				margin:0 auto;
+				padding:0;
+			}
+			.theme_welcome .theme_welcome-title{
+				color: <?php print t::h($colors['link']); ?>;
+				font-weight:bold;
+				font-size:xx-large;
+				margin:1em 0 0.5em 0;
+			}
+			.theme_welcome .theme_welcome-message{
+				color: <?php print $messageBoxSetting['main']; ?>;
+				border:2px solid <?php print $messageBoxSetting['main']; ?>;
+				background-color: <?php print $messageBoxSetting['bg']; ?>;
+				border-radius: <?php print $messageBoxSetting['radius']; ?>;
+				padding:0.5em 1em;
+				max-width:680px;
+				margin:0 auto 10px auto;
+			}
+			.theme_welcome .theme_welcome-message *{
+				margin-top:0;
+				margin-bottom:0;
+			}
+			.theme_welcome .theme_welcome-message ul{
+				text-align:left;
+				word-break:break-all;
+			}
+			.theme_welcome .theme_welcome-image_everyone{
+				text-align:center;
+			}
+		</style>
+<?php
+	//↓コンテンツから受け取った
+	//	headセクション内用のソースを出力しています。
+	print $px->theme()->pull_content('head');
+?>
+	</head>
+	<body class="theme_layout_top">
+		<header id="page_top">
+			<h1 class="theme_logo"><a href="<?php print t::h( $px->theme()->href('') ); ?>"><?php print t::h($px->get_conf('project.name')); ?></a></h1>
+<?php
+	$global_menu = $px->site()->get_global_menu();
+	if( count($global_menu) ){
+		print '			<div class="theme_head_menu"><nav>'."\n";
+		print '				<ul>'."\n";
+		foreach( $global_menu as $pid ){
+			?><li><?php print $px->theme()->mk_link($pid); ?></li><?php
+		}
+		print '				</ul>'."\n";
+		print '			</nav></div>'."\n";
+	}
+?>
+		</header>
+		<div class="theme_welcome">
+			<div class="theme_welcome-inner">
+				<p class="theme_welcome-title"><?php print $obj_funcs->create_src_welcome_svg(); ?></p>
+				<div class="theme_welcome-body clearfix">
+					<div class="theme_welcome-message">
+						<?php print $obj_funcs->mk_setup_test( $test_results ); ?>
+					</div>
+					<?php if( !count($test_results) ){ ?>
+						<div class="theme_welcome-image_everyone"><img src="<?php print $px->path_theme_files('img/everyone.png'); ?>" alt="" /></div>
+					<?php } ?>
+				</div>
+			</div>
+		</div>
+		<div class="theme_outline">
+			<div class="theme_middle">
+				<div class="theme_column1">
+					<div class="theme_column1-content">
+						<div id="content" class="contents">
+
+<?php
+	//↓コンテンツから受け取った
+	//	コンテンツエリアのソースを出力しています。
+	print $px->theme()->pull_content();
+?>
+
+						</div><!-- /#content -->
+					</div>
+				</div><!-- /.theme_column1 -->
+				<div class="theme_column2">
+					<nav>
+						<div class="theme_localnavi">
+<?php /*
+↓ ここからの記述は、ローカルナビゲーションの自動生成ロジックです。
+*/ ?>
+<?php if( $px->site()->get_page_info($px->req()->get_request_file_path(),'id') ){ ?>
+<div class="theme_localnavi-parent"><?php print $px->theme()->mk_link($px->site()->get_parent($px->req()->get_request_file_path())); ?></div>
+<?php } ?>
+
+<?php
+	$local_bros_page_info = $px->site()->get_bros();
+?>
+
+<?php if( count($local_bros_page_info) ){ ?>
+<ul>
+<?php foreach( $local_bros_page_info as $local_page_id ){ ?>
+<?php $local_page_info = $px->site()->get_page_info($local_page_id); ?>
+<li><?php print $px->theme()->mk_link($local_page_info['path']); ?>
+<?php if( $px->site()->is_page_in_breadcrumb( $local_page_info['id'] ) ){ ?>
+<?php $local_children = $px->site()->get_children( $local_page_info['id'] ); ?>
+<?php if( count($local_children) ){ ?>
+<ul>
+<?php foreach( $local_children as $local_child_page_id ){ ?>
+<?php $local_child_page_info = $px->site()->get_page_info($local_child_page_id); ?>
+<li><?php print $px->theme()->mk_link($local_child_page_info['path']); ?></li>
+<?php }//foreach ?>
+</ul>
+<?php }//if ?>
+<?php }//if ?>
+</li>
+<?php }//foreach ?>
+</ul>
+<?php }//if ?>
+<?php /*
+↑ ローカルナビゲーションの自動生成ロジックはここで終わりです。
+*/ ?>
+						</div><!-- /.theme_localnavi -->
+					</nav>
+
+
+				</div><!-- /.theme_column2 -->
+			</div><!-- /.theme_middle -->
+		</div><!-- /.theme_outline -->
+		<footer><div class="theme_footer_inner">
+			<div class="theme_foot_back2top"><a href="#page_top" class="up">ページの先頭へ戻る</a></div>
+			<div class="theme_foot_menu"><nav>
+				<ul>
+					<li><?php print $px->theme()->mk_link('', array('current'=>empty($page_info['id']))); ?></li>
+<?php
+	$global_menu = $px->site()->get_global_menu();
+	foreach( $global_menu as $pid ){
+		?><li><?php print $px->theme()->mk_link($pid); ?></li><?php
+	}
+?>
+				</ul>
+			</nav></div>
+		</div></footer>
+	</body>
+</html>
