@@ -22,5 +22,5 @@
 #php_value error_reporting 32767
 
 # for large contents
-#php_value memory_limit -1
+php_value memory_limit -1
 
