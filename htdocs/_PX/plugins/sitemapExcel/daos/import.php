@@ -5,38 +5,48 @@
  */
 class pxplugin_sitemapExcel_daos_import{
 
-	private $command;
 	private $px;
+	private $plugin;
+	private $path_import_data_dir;
 
 
 	/**
 	 * コンストラクタ
-	 * @param $command = PXコマンド配列
 	 * @param $px = PxFWコアオブジェクト
 	 */
-	public function __construct( $command, $px ){
-		$this->command = $command;
+	public function __construct( $px ){
 		$this->px = $px;
+		$this->plugin = $this->px->get_plugin_object('sitemapExcel');
+		$this->path_import_data_dir = $this->plugin->get_path_import_data_dir();
 	}
 
-
 	/**
-	 * PHPExcelHelper を生成する
+	 * エクセルのパスを取得
 	 */
-	private function factory_PHPExcelHelper(){
-		$tmp_class_name = $this->px->load_px_plugin_class('/'.$this->command[1].'/helper/PHPExcelHelper.php');
-		if(!$tmp_class_name){
-			$this->px->error()->error_log('FAILED to load "PHPExcelHelper.php".', __FILE__, __LINE__);
-			return false;
-		}
-		$phpExcelHelper = new $tmp_class_name($this->px);
-		return $phpExcelHelper;
-	}// factory_PHPExcelHelper()
+	public function get_realpath_xlsx(){
+		return $this->path_import_data_dir.'sitemapExcel.xlsx';
+	}
+	/**
+	 * 出力先CSVのパスを取得
+	 */
+	public function get_realpath_csv(){
+		return $this->path_import_data_dir.'sitemapExcel.csv';
+	}
+	/**
+	 * ログファイルのパスを取得
+	 */
+	public function get_realpath_logfile(){
+		return $this->path_import_data_dir.'import.txt';
+	}
 
 	/**
 	 * xlsxからサイトマップCSVを出力する。
 	 */
-	public function import_xlsx2sitemap( $path_xlsx, $path_csv ){
+	public function import_xlsx2sitemap(){
+		$path_xlsx = $this->get_realpath_xlsx();
+		$path_csv  = $this->get_realpath_csv();
+		$path_log  = $this->get_realpath_logfile();
+
 		$path_toppage = '/';
 		if( strlen($this->px->get_conf('project.path_top')) ){
 			$path_toppage = $this->px->get_conf('project.path_top');
@@ -44,7 +54,7 @@ class pxplugin_sitemapExcel_daos_import{
 		$path_toppage = $this->regulize_path( $path_toppage );
 
 		$sitemap_definition = $this->px->site()->get_sitemap_definition();
-		$phpExcelHelper = $this->factory_PHPExcelHelper();
+		$phpExcelHelper = $this->plugin->factory_PHPExcelHelper();
 		if( !$phpExcelHelper ){
 			return false;
 		}
@@ -120,31 +130,6 @@ class pxplugin_sitemapExcel_daos_import{
 				// 削除フラグ
 				continue;
 			}
-			if(!strlen( $tmp_page_info['path'] )){
-				// pathが空白なら終わったものと思う。
-				break;
-			}
-			if( !array_key_exists('list_flg', $xls_custom_column_definition) ){
-				// エクセルの定義にlist_flg列がなかったら、
-				// 全ページにlist_flg=1をセット。
-				$tmp_page_info['list_flg'] = 1;
-			}
-
-			// 読み込んだパスを正規化
-			$tmp_page_info['path'] = $this->regulize_path( $tmp_page_info['path'] );
-
-			// 省略されたIDを自動的に付与
-			if(!strlen($tmp_page_info['id'])){
-				// トップページは空白でなければならない。
-				if( $path_toppage != $tmp_page_info['path'] ){
-					$tmp_page_info['id'] = $this->generate_auto_page_id();
-				}
-			}
-
-			// トップページは空白でなければならない。
-			if( $path_toppage == $tmp_page_info['path'] ){
-				$tmp_page_info['id'] = '';
-			}
 
 			// タイトルだけ特別
 			$col_title_col = $col_title['start'];
@@ -166,6 +151,36 @@ class pxplugin_sitemapExcel_daos_import{
 			}
 			unset($col_title_col);
 			unset($tmp_alias_title);
+
+			if(!strlen( $tmp_page_info['path'] )){
+				if(!strlen( $tmp_page_info['title'] )){
+					// pathもtitleも空白なら終わったものと思う。
+					break;
+				}
+				$tmp_page_info['path'] = 'alias:/_tbd.html';//pathがなくてもtitleがあれば、仮の値を入れて通す。
+			}
+
+			if( !array_key_exists('list_flg', $table_definition['col_define']) ){
+				// エクセルの定義にlist_flg列がなかったら、
+				// 全ページにlist_flg=1をセット。
+				$tmp_page_info['list_flg'] = 1;
+			}
+
+			// 読み込んだパスを正規化
+			$tmp_page_info['path'] = $this->regulize_path( $tmp_page_info['path'] );
+
+			// 省略されたIDを自動的に付与
+			if(!strlen($tmp_page_info['id'])){
+				// トップページは空白でなければならない。
+				if( $path_toppage != $tmp_page_info['path'] ){
+					$tmp_page_info['id'] = $this->generate_auto_page_id();
+				}
+			}
+
+			// トップページは空白でなければならない。
+			if( $path_toppage == $tmp_page_info['path'] ){
+				$tmp_page_info['id'] = '';
+			}
 
 			// パンくずも特別
 			$tmp_breadcrumb = $last_breadcrumb;
@@ -276,6 +291,10 @@ class pxplugin_sitemapExcel_daos_import{
 		parse_str( $objSheet->getCell('A1')->getCalculatedValue(), $rtn );
 		$rtn['row_definition'] = intval($rtn['row_definition']);
 		$rtn['row_data_start'] = intval($rtn['row_data_start']);
+		if( !strlen($rtn['skip_empty_col']) ){
+			// 省略されていた場合にデフォルト値を与える
+			$rtn['skip_empty_col'] = 20;
+		}
 		$rtn['skip_empty_col'] = intval($rtn['skip_empty_col']);
 
 		$rtn['col_define'] = array();

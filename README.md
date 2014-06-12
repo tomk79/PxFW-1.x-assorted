@@ -11,7 +11,7 @@ Pickles Framework(PxFW) に、ライブラリやプラグインなどをプリ�
   - libs
     - <a href="https://phpexcel.codeplex.com/" target="_blank">PHPExcel</a> 1.7.8 (LGPL)
   - plugins
-    - <a href="https://github.com/tomk79/PxPlugin_sitemapExcel" target="_blank">sitemapExcel</a> 0.5.0b3 (MIT)
+    - <a href="https://github.com/tomk79/PxPlugin_sitemapExcel" target="_blank">sitemapExcel</a> 0.5.0 (MIT)
 
 
 ## Pickles Framework について
