@@ -529,7 +529,7 @@ class px_cores_site{
 		if( is_null( @$this->sitemap_array[$path] ) ){
 			//  サイトマップにズバリなければ、
 			//  引数からパラメータを外したパスだけで再検索
-			$path = $parsed_url['path'];
+			$path = @$parsed_url['path'];
 		}
 
 		$rtn = @$this->sitemap_array[$path];
@@ -815,7 +815,7 @@ class px_cores_site{
 			//  ページキャッシュツリーがすでに作られている場合
 			return $this->sitemap_page_tree[$page_info['path']]['children'];
 		}
-		if( !$filter && is_array( $this->sitemap_page_tree[$page_info['path']]['children_all'] ) ){
+		if( !$filter && is_array( @$this->sitemap_page_tree[$page_info['path']]['children_all'] ) ){
 			//  ページキャッシュツリーがすでに作られている場合
 			return $this->sitemap_page_tree[$page_info['path']]['children_all'];
 		}
@@ -862,13 +862,13 @@ class px_cores_site{
 			unset($tmp_breadcrumb,$tmp_path,$tmp_page_info);
 
 			if( $page_info['id'] == $parent_page_id ){
-				if(strlen($row['orderby'])){
+				if(@strlen($row['orderby'])){
 					array_push( $tmp_children_orderby_manual , $row['id'] );
 				}else{
 					array_push( $tmp_children_orderby_auto , $row['id'] );
 				}
 				if( $row['list_flg'] ){
-					if(strlen($row['orderby'])){
+					if(@strlen($row['orderby'])){
 						array_push( $tmp_children_orderby_listed_manual , $row['id'] );
 					}else{
 						array_push( $tmp_children_orderby_listed_auto , $row['id'] );
@@ -951,7 +951,7 @@ class px_cores_site{
 			$path = $this->px->req()->get_request_file_path();
 		}
 		$filter = true;
-		if(!is_null($opt['filter'])){ $filter = !empty($opt['filter']); }
+		if(!is_null(@$opt['filter'])){ $filter = !empty($opt['filter']); }
 
 		$bros = $this->get_bros($path,$opt);
 		$page_info = $this->get_page_info($path);
@@ -960,12 +960,13 @@ class px_cores_site{
 			return false;
 		}
 
+		$num = 0;
 		foreach($bros as $num=>$row){
 			if( $row == $page_info['id'] ){
 				break;
 			}
 		}
-		for($i = $num+1; !is_null($bros[$i]); $i ++){
+		for($i = $num+1; @!is_null($bros[$i]); $i ++){
 			if(is_null($bros[$i])){
 				return false;
 			}
@@ -988,7 +989,7 @@ class px_cores_site{
 			$path = $this->px->req()->get_request_file_path();
 		}
 		$filter = true;
-		if(!is_null($opt['filter'])){ $filter = !empty($opt['filter']); }
+		if(!is_null(@$opt['filter'])){ $filter = !empty($opt['filter']); }
 
 		$bros = $this->get_bros($path,$opt);
 		$page_info = $this->get_page_info($path);
@@ -997,12 +998,13 @@ class px_cores_site{
 			return false;
 		}
 
+		$num = 0;
 		foreach($bros as $num=>$row){
 			if( $row == $page_info['id'] ){
 				break;
 			}
 		}
-		for($i = $num-1; !is_null($bros[$i]); $i --){
+		for($i = $num-1; @!is_null($bros[$i]); $i --){
 			if(is_null($bros[$i])){
 				return false;
 			}
@@ -1018,6 +1020,12 @@ class px_cores_site{
 	 * 
 	 * @param string $path 起点とするページのパス または ページID。省略時、カレントページから自動的に取得します。
 	 * @param array $opt オプション(省略可)
+	 * <dl>
+	 *   <dt>$opt['filter'] (初期値: `true`)</dt>
+	 *     <dd>フィルターの有効/無効を切り替えます。`true` のとき有効、`false`のとき無効となります。フィルターが有効な場合、エイリアスが除外され、さらにその次のページを探します。</dd>
+	 *   <dt>$opt['skip_children'] (初期値: `false`)</dt>
+	 *     <dd>子供をスキップするか。`true` のときスキップ、`false`のとき子供も対象とします。これは内部で再帰的に実行する際の無限ループを避けるためのフラグとして設けられました。通常はこれを指定する必要はありません。</dd>
+	 * </dl>
 	 * @return string|bool ページID。存在しない場合は `false`を返します。
 	 */
 	public function get_next( $path = null, $opt = array() ){
@@ -1025,36 +1033,51 @@ class px_cores_site{
 			$path = $this->px->req()->get_request_file_path();
 		}
 		$filter = true;
-		if(!is_null($opt['filter'])){ $filter = !empty($opt['filter']); }
-
-		//  子供がいたら
-		if(!$opt['skip_children']){
-			$children = $this->get_children($path,$opt);
-			if(is_array($children) && count($children)){
-				foreach($children as $child){
-					if($filter===true){
-						if($this->get_page_info($child,'layout') == 'popup'){//popupページは含まない
-							continue;
-						}
-						if($this->get_path_type($this->px->site()->get_page_info($child,'path')) == 'alias'){//エイリアスは含まない
-							continue;
-						}
-					}
-					return $child;
-				}
-			}
+		if(!is_null(@$opt['filter'])){
+			$filter = !empty(@$opt['filter']);
+		}
+		$skip_children = false;
+		if(!is_null(@$opt['skip_children'])){
+			$skip_children = !empty(@$opt['skip_children']);
 		}
 
-		//  次の兄弟がいたら、そのひとがnext
-		$page_bros_next = $this->get_bros_next($path,$opt);
-		if($page_bros_next!==false){return $page_bros_next;}
+		$fin = null;
 
-		//  親の兄弟
+		$children = $this->get_children($path,$opt);
+		$page_bros_next = $this->get_bros_next($path, $opt);
 		$parent = $this->get_parent($path);
-		if($parent===false){return false;}
 
-		$rtn = $this->get_next($parent, array('skip_children'=>true,'filter'=>$filter));
-		return $rtn;
+		//  子供がいたら
+		if( !$skip_children && is_array($children) && count($children) ){
+			$fin = $children[0];
+		}elseif( $page_bros_next!==false ){
+			//  次の兄弟がいたら、そのひとがnext
+			$fin = $page_bros_next;
+		}elseif( $parent !== false ){
+			//  親の兄弟
+			$fin = $this->get_next($parent, array('skip_children'=>true,'filter'=>$filter));
+		}else{
+			return false;
+		}
+
+
+		// 除外条件 検証
+		if(
+			$this->get_page_info($fin, 'layout') == 'popup' // <- popupはとばす (行き止まりができるので)
+		){
+			return $this->get_next($fin, $opt);
+		}
+
+		// フィルター検証
+		if( $filter===true &&
+			(
+				$this->get_path_type($this->get_page_info($fin, 'path')) == 'alias' // <- エイリアスはとばす (ループが起きるので)
+			)
+		){
+			return $this->get_next($fin, $opt);
+		}
+
+		return $fin;
 	}
 
 	/**
@@ -1062,6 +1085,10 @@ class px_cores_site{
 	 * 
 	 * @param string $path 起点とするページのパス または ページID。省略時、カレントページから自動的に取得します。
 	 * @param array $opt オプション(省略可)
+	 * <dl>
+	 *   <dt>$opt['filter'] (初期値: `true`)</dt>
+	 *     <dd>フィルターの有効/無効を切り替えます。`true` のとき有効、`false`のとき無効となります。フィルターが有効な場合、エイリアスが除外され、さらにその前のページを探します。</dd>
+	 * </dl>
 	 * @return string|bool ページID。存在しない場合は `false`を返します。
 	 */
 	public function get_prev( $path = null, $opt = array() ){
@@ -1069,31 +1096,55 @@ class px_cores_site{
 			$path = $this->px->req()->get_request_file_path();
 		}
 		$filter = true;
-		if(!is_null($opt['filter'])){ $filter = !empty($opt['filter']); }
-
-		//  前の兄弟がいたら、そのひとがprev
-		$page_bros_prev = $this->get_bros_prev($path,$opt);
-		if($page_bros_prev!==false){
-			// 前の兄弟の子供を調べる。 該当する子供がいたらそのひとがprev
-			$prev_children = $this->get_children($page_bros_prev,$opt);
-			if(is_array($prev_children) && count($prev_children)){
-				if( $filter===false || $this->get_page_info($prev_children[count($prev_children)-1], 'layout') != 'popup' && $this->get_path_type($this->get_page_info($prev_children[count($prev_children)-1], 'path')) != 'alias'){
-					return $prev_children[count($prev_children)-1];
-				}
-				$child_prev = $this->get_bros_prev($prev_children[count($prev_children)-1],$opt);
-				if( $child_prev !== false ){
-					return $child_prev;
-				}
-			}
-			return $page_bros_prev;
+		if(!is_null(@$opt['filter'])){
+			$filter = !empty(@$opt['filter']);
 		}
 
-		//  親の兄弟
-		$parent = $this->get_parent($path);
-		if($parent===false){return false;}
+		$fin = null;
+		$current_page = $path;
 
-		return $parent;
-	}
+		//  前の兄弟がいたら、そのひとがprev
+		$page_bros_prev = $this->get_bros_prev($current_page,$opt);
+		if($page_bros_prev!==false){
+			// [兄がいた場合]
+			// 前の兄弟の子供を調べる。
+			$fin = $page_bros_prev;
+			while( $prev_children = $this->get_children($fin, $opt) ){
+				if(is_array($prev_children) && count($prev_children)){
+					// 該当する子供がいたら末っ子がprev
+					$fin = $prev_children[count($prev_children)-1];
+					continue;
+				}
+				break;
+			}
+		}else{
+			// [兄がいない場合]
+			// 親を返す
+			$parent = $this->get_parent($current_page);
+			if($parent===false){
+				return false;
+			}
+			$fin = $parent;
+		}
+
+		// 除外条件 検証
+		if(
+			$this->get_page_info($fin, 'layout') == 'popup' // <- popupはとばす (行き止まりができるので)
+		){
+			return $this->get_prev($fin, $opt);
+		}
+
+		// フィルター検証
+		if( $filter===true &&
+			(
+				$this->get_path_type($this->get_page_info($fin, 'path')) == 'alias' // <- エイリアスはとばす (ループが起きるので)
+			)
+		){
+			return $this->get_prev($fin, $opt);
+		}
+
+		return $fin;
+	}// get_prev()
 
 	/**
 	 * パンくず配列を取得する。
